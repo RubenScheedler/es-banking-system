@@ -1,4 +1,4 @@
-package dev.rubenscheedler.hashnode.esbanking;
+package dev.hashnode.rubenscheedler.esbanking;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
