@@ -57,4 +57,9 @@ public class Account {
         accountId = event.getId();
         balance = event.getInitialBalance();
     }
+
+    @EventSourcingHandler
+    public void on(CashDepositedEvent event) {
+        balance = Money.builder().amount(balance.getAmount() + event.getAmount().getAmount()).build();
+    }
 }

@@ -25,10 +25,7 @@ class AccountTest {
         testFixture
                 .givenNoPriorActivity()
                 .when(CreateAccountCommand.builder().accountId(accountId).initialBalance(Money.builder().amount(400L).build()).build())
-                .expectEvents(AccountCreatedEvent.builder()
-                        .id(accountId)
-                        .initialBalance(Money.builder().amount(400L).build())
-                        .build()
+                .expectEvents(defaultAccountCreatedEvent(400L)
                 );
     }
 
@@ -77,8 +74,23 @@ class AccountTest {
         // given
         Account state = new Account();
         // when
-        state.on(AccountCreatedEvent.builder().id(accountId).initialBalance(Money.builder().amount(500L).build()).build());
+        state.on(defaultAccountCreatedEvent(500L));
         // then
         assertThat(state.getBalance()).isEqualTo(Money.builder().amount(500L).build());
+    }
+
+    @Test
+    void onCashDepositedEvent_balanceIncreased() {
+        // given
+        Account account = new Account();
+        account.on(defaultAccountCreatedEvent(500L));
+        // when
+        account.on(CashDepositedEvent.builder().accountId(accountId).amount(Money.builder().amount(1000L).build()).build());
+        // then
+        assertThat(account.getBalance().getAmount()).isEqualTo(1500L);
+    }
+
+    private AccountCreatedEvent defaultAccountCreatedEvent(long amount) {
+        return AccountCreatedEvent.builder().id(accountId).initialBalance(Money.builder().amount(amount).build()).build();
     }
 }
