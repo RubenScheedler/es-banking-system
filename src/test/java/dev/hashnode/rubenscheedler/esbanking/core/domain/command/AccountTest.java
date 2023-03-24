@@ -3,6 +3,7 @@ package dev.hashnode.rubenscheedler.esbanking.core.domain.command;
 import dev.hashnode.rubenscheedler.esbanking.core.domain.command.commands.CreateAccountCommand;
 import dev.hashnode.rubenscheedler.esbanking.core.domain.command.events.AccountCreatedEvent;
 import dev.hashnode.rubenscheedler.esbanking.core.domain.command.exceptions.NegativeInitialAccountBalanceException;
+import dev.hashnode.rubenscheedler.esbanking.core.domain.model.value.Money;
 import org.axonframework.test.aggregate.AggregateTestFixture;
 import org.axonframework.test.aggregate.FixtureConfiguration;
 import org.junit.jupiter.api.Test;
@@ -20,10 +21,10 @@ class AccountTest {
     void handleCreateAccountCommand_publishesAccountCreatedEvent() {
         testFixture
                 .givenNoPriorActivity()
-                .when(CreateAccountCommand.builder().accountId(accountId).initialBalance(400L).build())
+                .when(CreateAccountCommand.builder().accountId(accountId).initialBalance(Money.builder().amount(400L).build()).build())
                 .expectEvents(AccountCreatedEvent.builder()
                         .id(accountId)
-                        .initialBalance(400L)
+                        .initialBalance(Money.builder().amount(400L).build())
                         .build()
                 );
     }
@@ -32,7 +33,7 @@ class AccountTest {
     void handleCreateAccountCommand_negativeInitialBalance_raisesException() {
         testFixture
                 .givenNoPriorActivity()
-                .when(CreateAccountCommand.builder().accountId(accountId).initialBalance(-250L).build())
+                .when(CreateAccountCommand.builder().accountId(accountId).initialBalance(Money.builder().amount(-250L).build()).build())
                 .expectException(NegativeInitialAccountBalanceException.class)
                 .expectExceptionMessage("An initial negative balance is not allowed.");
     }
@@ -52,8 +53,8 @@ class AccountTest {
         // given
         Account state = new Account();
         // when
-        state.on(AccountCreatedEvent.builder().id(accountId).initialBalance(500L).build());
+        state.on(AccountCreatedEvent.builder().id(accountId).initialBalance(Money.builder().amount(500L).build()).build());
         // then
-        assertThat(state.getBalance()).isEqualTo(500L);
+        assertThat(state.getBalance()).isEqualTo(Money.builder().amount(500L).build());
     }
 }

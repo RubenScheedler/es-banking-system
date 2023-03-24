@@ -1,8 +1,10 @@
 package dev.hashnode.rubenscheedler.esbanking.core.domain.command;
 
 import dev.hashnode.rubenscheedler.esbanking.core.domain.command.commands.CreateAccountCommand;
+import dev.hashnode.rubenscheedler.esbanking.core.domain.command.commands.DepositCashCommand;
 import dev.hashnode.rubenscheedler.esbanking.core.domain.command.events.AccountCreatedEvent;
 import dev.hashnode.rubenscheedler.esbanking.core.domain.command.exceptions.NegativeInitialAccountBalanceException;
+import dev.hashnode.rubenscheedler.esbanking.core.domain.model.value.Money;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.axonframework.commandhandling.CommandHandler;
@@ -23,11 +25,11 @@ public class Account {
     /**
      * Amount of money in the account in cents (to avoid rounding)
      */
-    private long balance;
+    private Money balance;
 
     @CommandHandler
     public Account(CreateAccountCommand command) {
-        if (command.getInitialBalance() < 0L) {
+        if (command.getInitialBalance().getAmount() < 0L) {
             throw new NegativeInitialAccountBalanceException("An initial negative balance is not allowed.");
         }
         apply(AccountCreatedEvent.builder()
@@ -35,6 +37,11 @@ public class Account {
                 .initialBalance(command.getInitialBalance())
                 .build()
         );
+    }
+
+    @CommandHandler
+    public void depositCash(DepositCashCommand depositCashCommand) {
+
     }
 
     @EventSourcingHandler

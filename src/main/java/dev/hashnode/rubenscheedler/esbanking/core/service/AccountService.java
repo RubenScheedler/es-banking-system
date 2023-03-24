@@ -1,6 +1,7 @@
 package dev.hashnode.rubenscheedler.esbanking.core.service;
 
 import dev.hashnode.rubenscheedler.esbanking.core.domain.command.commands.CreateAccountCommand;
+import dev.hashnode.rubenscheedler.esbanking.core.domain.model.value.Money;
 import dev.hashnode.rubenscheedler.esbanking.core.domain.query.AccountView;
 import dev.hashnode.rubenscheedler.esbanking.core.domain.query.queries.ViewAccountQuery;
 import dev.hashnode.rubenscheedler.esbanking.core.service.exception.AccountCouldNotBeCreatedException;
@@ -22,7 +23,7 @@ public class AccountService {
         UUID accountId = UUID.randomUUID();
         long initialBalance = 0L;
         CreateAccountCommand command = CreateAccountCommand.builder()
-                .initialBalance(initialBalance)
+                .initialBalance(Money.builder().amount(initialBalance).build())
                 .accountId(accountId)
                 .build();
         log.debug(String.format("Account created with id %s and initialBalance %d", accountId, initialBalance));

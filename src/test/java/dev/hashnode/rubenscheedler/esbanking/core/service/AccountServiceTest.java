@@ -53,7 +53,7 @@ class AccountServiceTest {
         accountService.createAccount();
 
         // then
-        verify(commandGateway).sendAndWait(argThat(c -> ((CreateAccountCommand)c).getInitialBalance() == 0L));
+        verify(commandGateway).sendAndWait(argThat(c -> ((CreateAccountCommand)c).getInitialBalance().getAmount() == 0L));
     }
 
     @Test

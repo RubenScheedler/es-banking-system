@@ -8,10 +8,7 @@ import java.util.UUID;
 
 @Value
 @Builder
-public class AccountCreatedEvent {
-    UUID id;
-    /**
-     * Initial balance of the account
-     */
-    Money initialBalance;
+public class CashDepositedEvent {
+    UUID accountId;
+    Money amount;
 }

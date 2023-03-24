@@ -27,7 +27,7 @@ public class AccountViewProjection {
     public void on(AccountCreatedEvent e) {
         accountViews.put(e.getId(), AccountView.builder()
                         .id(e.getId())
-                        .balance(e.getInitialBalance())
+                        .balance(e.getInitialBalance().getAmount())
                 .build());
     }
 

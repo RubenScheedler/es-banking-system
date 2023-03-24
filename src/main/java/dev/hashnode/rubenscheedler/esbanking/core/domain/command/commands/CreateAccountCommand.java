@@ -1,5 +1,6 @@
 package dev.hashnode.rubenscheedler.esbanking.core.domain.command.commands;
 
+import dev.hashnode.rubenscheedler.esbanking.core.domain.model.value.Money;
 import lombok.Builder;
 import lombok.NonNull;
 import lombok.Value;
@@ -16,5 +17,5 @@ public class CreateAccountCommand {
     @NonNull
     @TargetAggregateIdentifier
     UUID accountId;
-    long initialBalance;
+    Money initialBalance;
 }
