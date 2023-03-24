@@ -9,13 +9,20 @@ import org.axonframework.modelling.command.TargetAggregateIdentifier;
 import java.util.UUID;
 
 /**
- * Command to create a new bank account.
+ * Command to reflect a cash withdrawal from an account.
  */
 @Value
 @Builder
-public class CreateAccountCommand {
+public class WithdrawCashCommand {
+    /**
+     * Account that the money should be withdrawn from
+     */
     @NonNull
     @TargetAggregateIdentifier
     UUID accountId;
-    Money initialBalance;
+    /**
+     * Amount of cash that is being deposited
+     */
+    @NonNull
+    Money amount;
 }

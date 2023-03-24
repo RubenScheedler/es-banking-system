@@ -1,6 +1,7 @@
 package dev.hashnode.rubenscheedler.esbanking.core.domain.query.projections;
 
 import dev.hashnode.rubenscheedler.esbanking.core.domain.command.events.AccountCreatedEvent;
+import dev.hashnode.rubenscheedler.esbanking.core.domain.model.value.Money;
 import dev.hashnode.rubenscheedler.esbanking.core.domain.query.AccountView;
 import dev.hashnode.rubenscheedler.esbanking.core.domain.query.queries.ViewAccountQuery;
 import org.junit.jupiter.api.Test;
@@ -24,7 +25,7 @@ class AccountViewProjectionTest {
         // given
         AccountCreatedEvent accountCreatedEvent = AccountCreatedEvent.builder()
                 .id(accountId)
-                .initialBalance(50L)
+                .initialBalance(Money.builder().amount(50L).build())
                 .build();
         accountViewProjection.on(accountCreatedEvent);
 
@@ -36,7 +37,7 @@ class AccountViewProjectionTest {
         // then
         assertThat(actual.isPresent()).isTrue();
         assertThat(actual.get().getId()).isEqualTo(accountCreatedEvent.getId());
-        assertThat(actual.get().getBalance()).isEqualTo(accountCreatedEvent.getInitialBalance());
+        assertThat(actual.get().getBalance()).isEqualTo(accountCreatedEvent.getInitialBalance().getAmount());
     }
 
     @Test
