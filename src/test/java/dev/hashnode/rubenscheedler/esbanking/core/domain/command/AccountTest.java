@@ -1,7 +1,10 @@
 package dev.hashnode.rubenscheedler.esbanking.core.domain.command;
 
 import dev.hashnode.rubenscheedler.esbanking.core.domain.command.commands.CreateAccountCommand;
+import dev.hashnode.rubenscheedler.esbanking.core.domain.command.commands.DepositCashCommand;
 import dev.hashnode.rubenscheedler.esbanking.core.domain.command.events.AccountCreatedEvent;
+import dev.hashnode.rubenscheedler.esbanking.core.domain.command.events.CashDepositedEvent;
+import dev.hashnode.rubenscheedler.esbanking.core.domain.command.exceptions.NegativeCashDepositException;
 import dev.hashnode.rubenscheedler.esbanking.core.domain.command.exceptions.NegativeInitialAccountBalanceException;
 import dev.hashnode.rubenscheedler.esbanking.core.domain.model.value.Money;
 import org.axonframework.test.aggregate.AggregateTestFixture;
@@ -36,6 +39,27 @@ class AccountTest {
                 .when(CreateAccountCommand.builder().accountId(accountId).initialBalance(Money.builder().amount(-250L).build()).build())
                 .expectException(NegativeInitialAccountBalanceException.class)
                 .expectExceptionMessage("An initial negative balance is not allowed.");
+    }
+
+    @Test
+    void handleDepositCashCommand_publishesCashDepositedEvent() {
+        testFixture
+                .givenCommands(CreateAccountCommand.builder().accountId(accountId).initialBalance(Money.builder().amount(400L).build()).build())
+                .when(DepositCashCommand.builder().accountId(accountId).amount(Money.builder().amount(400L).build()).build())
+                .expectEvents(CashDepositedEvent.builder()
+                        .accountId(accountId)
+                        .amount(Money.builder().amount(400L).build())
+                        .build()
+                );
+    }
+
+    @Test
+    void handleDepositCashCommand_negativeAmount_raisesException() {
+        testFixture
+                .givenCommands(CreateAccountCommand.builder().accountId(accountId).initialBalance(Money.builder().amount(400L).build()).build())
+                .when(DepositCashCommand.builder().accountId(accountId).amount(Money.builder().amount(-250L).build()).build())
+                .expectException(NegativeCashDepositException.class)
+                .expectExceptionMessage("A deposit of -250 was attempted for account " + accountId);
     }
 
     @Test
