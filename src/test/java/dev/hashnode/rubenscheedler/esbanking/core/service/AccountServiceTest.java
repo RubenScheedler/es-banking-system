@@ -1,6 +1,9 @@
 package dev.hashnode.rubenscheedler.esbanking.core.service;
 
 import dev.hashnode.rubenscheedler.esbanking.core.domain.command.commands.CreateAccountCommand;
+import dev.hashnode.rubenscheedler.esbanking.core.domain.command.commands.DepositCashCommand;
+import dev.hashnode.rubenscheedler.esbanking.core.domain.command.commands.WithdrawCashCommand;
+import dev.hashnode.rubenscheedler.esbanking.core.domain.model.value.Money;
 import dev.hashnode.rubenscheedler.esbanking.core.domain.query.AccountView;
 import dev.hashnode.rubenscheedler.esbanking.core.service.exception.AccountCouldNotBeCreatedException;
 import org.axonframework.commandhandling.gateway.CommandGateway;
@@ -11,6 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
@@ -92,5 +96,83 @@ class AccountServiceTest {
         assertThatThrownBy(() -> accountService.createAccount())
                 // then
                 .isInstanceOf(AccountCouldNotBeCreatedException.class);
+    }
+
+    @Test
+    void depositCash_publishesDepositCashCommand() {
+        // given
+        UUID accountId = UUID.randomUUID();
+        Money money = Money.builder().amount(500L).build();
+
+        // when
+        accountService.depositCash(accountId, money);
+
+        // then
+        verify(commandGateway).sendAndWait(argThat(c -> c instanceof DepositCashCommand));
+    }
+
+    @Test
+    void depositCash_publishesCommand_withRightAccountId() {
+        // given
+        UUID expected = UUID.randomUUID();
+        Money money = Money.builder().amount(500L).build();
+
+        // when
+        accountService.depositCash(expected, money);
+
+        // then
+        verify(commandGateway).sendAndWait(argThat(c -> ((DepositCashCommand)c).getAccountId().equals(expected)));
+    }
+
+    @Test
+    void depositCash_publishesCommand_withRightAmount() {
+        // given
+        UUID accountId = UUID.randomUUID();
+        Money expected = Money.builder().amount(500L).build();
+
+        // when
+        accountService.depositCash(accountId, expected);
+
+        // then
+        verify(commandGateway).sendAndWait(argThat(c -> ((DepositCashCommand)c).getAmount().equals(expected)));
+    }
+
+    @Test
+    void withdrawCash_publishesWithdrawCashCommand() {
+        // given
+        UUID accountId = UUID.randomUUID();
+        Money money = Money.builder().amount(500L).build();
+
+        // when
+        accountService.withdrawCash(accountId, money);
+
+        // then
+        verify(commandGateway).sendAndWait(argThat(c -> c instanceof WithdrawCashCommand));
+    }
+
+    @Test
+    void withdrawCash_publishesCommand_withRightAccountId() {
+        // given
+        UUID expected = UUID.randomUUID();
+        Money money = Money.builder().amount(500L).build();
+
+        // when
+        accountService.withdrawCash(expected, money);
+
+        // then
+        verify(commandGateway).sendAndWait(argThat(c -> ((WithdrawCashCommand)c).getAccountId().equals(expected)));
+    }
+
+    @Test
+    void withdrawCash_publishesCommand_withRightAmount() {
+        // given
+        UUID accountId = UUID.randomUUID();
+        Money expected = Money.builder().amount(500L).build();
+
+        // when
+        accountService.withdrawCash(accountId, expected);
+
+        // then
+        verify(commandGateway).sendAndWait(argThat(c -> ((WithdrawCashCommand)c).getAmount().equals(expected)));
     }
 }
