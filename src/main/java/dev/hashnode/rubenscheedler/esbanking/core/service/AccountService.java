@@ -1,6 +1,8 @@
 package dev.hashnode.rubenscheedler.esbanking.core.service;
 
 import dev.hashnode.rubenscheedler.esbanking.core.domain.command.commands.CreateAccountCommand;
+import dev.hashnode.rubenscheedler.esbanking.core.domain.command.commands.DepositCashCommand;
+import dev.hashnode.rubenscheedler.esbanking.core.domain.command.commands.WithdrawCashCommand;
 import dev.hashnode.rubenscheedler.esbanking.core.domain.model.value.Money;
 import dev.hashnode.rubenscheedler.esbanking.core.domain.query.AccountView;
 import dev.hashnode.rubenscheedler.esbanking.core.domain.query.queries.ViewAccountQuery;
@@ -36,5 +38,29 @@ public class AccountService {
             log.debug(String.format("While querying account %s an exception occurred", accountId), e);
             throw new AccountCouldNotBeCreatedException("Account could not be created", e);
         }
+    }
+
+    /**
+     * Performs a cash deposit for an account.
+     * @param accountId Account to deposit on
+     * @param money Money to deposit on the account
+     */
+    public void depositCash(UUID accountId, Money money) {
+        commandGateway.sendAndWait(DepositCashCommand.builder()
+                        .accountId(accountId)
+                        .amount(money)
+                .build());
+    }
+
+    /**
+     * Performs a cash withdrawal for an account.
+     * @param accountId Account to withdraw from
+     * @param money Money to withdraw from the account
+     */
+    public void withdrawCash(UUID accountId, Money money) {
+        commandGateway.sendAndWait(WithdrawCashCommand.builder()
+                .accountId(accountId)
+                .amount(money)
+                .build());
     }
 }
