@@ -6,8 +6,7 @@ import dev.hashnode.rubenscheedler.esbanking.core.service.exception.AccountCould
 import dev.hashnode.rubenscheedler.esbanking.rest.model.AccountDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 
@@ -24,4 +23,5 @@ public class AccountController {
         AccountView account = accountService.createAccount();
         return ResponseEntity.created(URI.create("/api/accounts/" + account.getId())).body(AccountDTO.from(account));
     }
+
 }
