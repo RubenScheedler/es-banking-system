@@ -11,12 +11,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.queryhandling.QueryGateway;
+import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 @RequiredArgsConstructor
 @Slf4j
+@Service
 public class AccountService {
     private final CommandGateway commandGateway;
     private final QueryGateway queryGateway;
