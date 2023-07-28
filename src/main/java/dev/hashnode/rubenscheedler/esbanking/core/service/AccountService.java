@@ -7,12 +7,14 @@ import dev.hashnode.rubenscheedler.esbanking.core.domain.model.value.Money;
 import dev.hashnode.rubenscheedler.esbanking.core.domain.query.AccountView;
 import dev.hashnode.rubenscheedler.esbanking.core.domain.query.queries.ViewAccountQuery;
 import dev.hashnode.rubenscheedler.esbanking.core.service.exception.AccountCouldNotBeCreatedException;
+import dev.hashnode.rubenscheedler.esbanking.core.service.exception.AccountCouldNotBeViewedException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.queryhandling.QueryGateway;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
@@ -44,6 +46,17 @@ public class AccountService {
         } catch (InterruptedException | ExecutionException e) {
             log.debug(String.format("While querying account %s an exception occurred", accountId), e);
             throw new AccountCouldNotBeCreatedException("Account could not be created", e);
+        }
+    }
+
+    /**
+     * Retrieves the accountview projection for the given account id, if it exists.
+     */
+    public Optional<AccountView> getAccount(UUID accountId) {
+        try {
+            return Optional.ofNullable(queryGateway.query(ViewAccountQuery.builder().accountId(accountId).build(), AccountView.class).get());
+        } catch (ExecutionException | InterruptedException e) {
+            throw new AccountCouldNotBeViewedException("An exception occured while querying the account with id " + accountId, e);
         }
     }
 

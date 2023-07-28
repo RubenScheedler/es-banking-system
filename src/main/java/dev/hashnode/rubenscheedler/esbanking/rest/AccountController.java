@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.Optional;
+import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -24,4 +26,11 @@ public class AccountController {
         return ResponseEntity.created(URI.create("/api/accounts/" + account.getId())).body(AccountDTO.from(account));
     }
 
+    @GetMapping("/api/accounts/{accountId}")
+    ResponseEntity<AccountDTO> getAccount(@PathVariable String accountId) {
+        Optional<AccountView> accountOptional = accountService.getAccount(UUID.fromString(accountId));
+        return accountOptional
+                .map(accountView -> ResponseEntity.ok(AccountDTO.from(accountView)))
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
 }

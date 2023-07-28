@@ -13,10 +13,12 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.Optional;
 import java.util.UUID;
 import static org.mockito.Mockito.*;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -32,10 +34,12 @@ class AccountControllerMvcTest {
 
     @BeforeEach
     void setUp() throws AccountCouldNotBeCreatedException {
-        when(accountService.createAccount()).thenReturn(AccountView.builder()
+        AccountView accountView = AccountView.builder()
                 .id(ACCOUNT_ID)
                 .balance(12040L)
-                .build());
+                .build();
+        when(accountService.createAccount()).thenReturn(accountView);
+        when(accountService.getAccount(any())).thenReturn(Optional.of(accountView));
     }
 
     @Test
@@ -50,4 +54,17 @@ class AccountControllerMvcTest {
                 .andExpect(header().string("Location","/api/accounts/"+ACCOUNT_ID));
     }
 
+    @Test
+    void getAccount_shouldReturnOk() throws Exception {
+        mockMvc.perform(get("/api/accounts/"+ACCOUNT_ID))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void getAccount_accountDoesNotExist_shouldReturnNotFound() throws Exception {
+        when(accountService.getAccount(any())).thenReturn(Optional.empty());
+
+        mockMvc.perform(get("/api/accounts/"+ACCOUNT_ID))
+                .andExpect(status().isNotFound());
+    }
 }

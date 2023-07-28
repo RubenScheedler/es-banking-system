@@ -5,7 +5,9 @@ import dev.hashnode.rubenscheedler.esbanking.core.domain.command.commands.Deposi
 import dev.hashnode.rubenscheedler.esbanking.core.domain.command.commands.WithdrawCashCommand;
 import dev.hashnode.rubenscheedler.esbanking.core.domain.model.value.Money;
 import dev.hashnode.rubenscheedler.esbanking.core.domain.query.AccountView;
+import dev.hashnode.rubenscheedler.esbanking.core.domain.query.queries.ViewAccountQuery;
 import dev.hashnode.rubenscheedler.esbanking.core.service.exception.AccountCouldNotBeCreatedException;
+import dev.hashnode.rubenscheedler.esbanking.core.service.exception.AccountCouldNotBeViewedException;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.queryhandling.QueryGateway;
 import org.junit.jupiter.api.Test;
@@ -14,6 +16,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -174,5 +177,65 @@ class AccountServiceTest {
 
         // then
         verify(commandGateway).sendAndWait(argThat(c -> ((WithdrawCashCommand)c).getAmount().equals(expected)));
+    }
+
+    @Test
+    void getAccount_accountExists_queriesQueryGateway() {
+        // given
+        AccountView expected = mock(AccountView.class);
+        CompletableFuture<AccountView> resultFuture = CompletableFuture.completedFuture(expected);
+        when(queryGateway.query(any(), eq(AccountView.class))).thenReturn(resultFuture);
+
+        UUID accountId = UUID.randomUUID();
+
+        // when
+        accountService.getAccount(accountId);
+
+        // then
+        verify(queryGateway).query(ViewAccountQuery.builder().accountId(accountId).build(), AccountView.class);
+    }
+
+    @Test
+    void getAccount_accountExists_returnsAccount() {
+        // given
+        AccountView expected = mock(AccountView.class);
+        CompletableFuture<AccountView> resultFuture = CompletableFuture.completedFuture(expected);
+        when(queryGateway.query(any(), eq(AccountView.class))).thenReturn(resultFuture);
+
+        UUID accountId = UUID.randomUUID();
+
+        // when
+        Optional<AccountView> actual = accountService.getAccount(accountId);
+
+        // then
+        assertThat(actual).isPresent();
+        assertThat(actual.get()).isEqualTo(expected);
+    }
+
+    @Test
+    void getAccount_accountDoesNotExist_returnsEmptyOptional() {
+        // given
+        CompletableFuture<AccountView> resultFuture = CompletableFuture.completedFuture(null);
+        when(queryGateway.query(any(), eq(AccountView.class))).thenReturn(resultFuture);
+
+        UUID accountId = UUID.randomUUID();
+
+        // when
+        Optional<AccountView> actual = accountService.getAccount(accountId);
+
+        // then
+        assertThat(actual).isEmpty();
+    }
+
+    @Test
+    void getAccount_interruptedExceptionOccurs_throwsException() {
+        // given
+        when(queryGateway.query(any(), eq(AccountView.class)))
+                .thenReturn(CompletableFuture.failedFuture(new InterruptedException()));
+
+        // when
+        assertThatThrownBy(() -> accountService.getAccount(UUID.randomUUID()))
+                // then
+                .isInstanceOf(AccountCouldNotBeViewedException.class);
     }
 }
